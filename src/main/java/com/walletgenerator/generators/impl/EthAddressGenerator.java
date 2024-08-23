@@ -1,42 +1,49 @@
 package com.walletgenerator.generators.impl;
 
-import static com.walletgenerator.utils.Constants.DERIVATION_NUMBER;
-import static com.walletgenerator.utils.Constants.EMPTY_STRING;
-import static com.walletgenerator.utils.Constants.ETH_PATH;
-import static com.walletgenerator.utils.Constants.NUM_ADDRESSES;
-import static com.walletgenerator.utils.Constants.QUOTE;
-import static com.walletgenerator.utils.Constants.RADIX;
-
+import com.walletgenerator.exception.WalletGenerationException;
 import com.walletgenerator.generators.WalletAddressGenerator;
 import com.walletgenerator.model.Wallet;
-import com.walletgenerator.utils.CommonUtil;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import lombok.extern.slf4j.Slf4j;
 import org.bitcoinj.crypto.ChildNumber;
 import org.web3j.crypto.Bip32ECKeyPair;
 import org.web3j.crypto.Credentials;
 
-public class EthAddressGenerator implements WalletAddressGenerator {
+@Slf4j
+public class EthAddressGenerator extends WalletAddressGenerator {
 
-    @Override
-    public List<Wallet> generateAddresses(String mnemonic) {
+    public static final String ETH_PATH = "m/44'/60'/0'/0/";
+    public static final int RADIX = 16;
 
-        byte[] seed = CommonUtil.generateSeedFromMnemonic(mnemonic);
 
-        Bip32ECKeyPair masterKeypair = Bip32ECKeyPair.generateKeyPair(seed);
+    public List<Wallet> generateAddresses(String mnemonic) throws WalletGenerationException {
 
-        return IntStream
-                .range(0, NUM_ADDRESSES)
-                .mapToObj(i -> getWallet(i, masterKeypair))
-                .collect(Collectors.toList());
+        try {
+
+            byte[] seed = generateSeedFromMnemonic(mnemonic);
+
+            Bip32ECKeyPair masterKeypair = Bip32ECKeyPair.generateKeyPair(seed);
+
+            return IntStream
+                    .range(0, NUM_ADDRESSES)
+                    .mapToObj(i -> getWallet(i, masterKeypair))
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+
+            log.error("ETHEREUM WALLET GENERATION FAILED", e);
+            throw new WalletGenerationException(ERROR_GENERATING_WALLETS, e);
+
+        }
     }
 
-    private static Wallet getWallet(int i, Bip32ECKeyPair masterKeypair) {
+    private Wallet getWallet(int i, Bip32ECKeyPair masterKeypair) {
         String ethPath = ETH_PATH + i + (i < DERIVATION_NUMBER ? QUOTE : EMPTY_STRING);
 
-        List<ChildNumber> paths = CommonUtil.parsePathWithHardAndSoft(ethPath);
+        List<ChildNumber> paths = parsePathWithHardAndSoft(ethPath);
 
         Bip32ECKeyPair derivedKeypair = Bip32ECKeyPair.deriveKeyPair(masterKeypair, Arrays
                 .stream(paths.toArray(new ChildNumber[0]))
@@ -48,7 +55,7 @@ public class EthAddressGenerator implements WalletAddressGenerator {
         return buildEth(derivedKeypair, credentials, ethPath);
     }
 
-    private static Wallet buildEth(Bip32ECKeyPair derivedKeypair, Credentials credentials, String path) {
+    private Wallet buildEth(Bip32ECKeyPair derivedKeypair, Credentials credentials, String path) {
 
         return Wallet
                 .builder()
