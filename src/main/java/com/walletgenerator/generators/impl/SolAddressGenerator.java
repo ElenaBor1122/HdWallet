@@ -19,14 +19,15 @@ import org.sol4k.PublicKey;
 @Slf4j
 public class SolAddressGenerator extends WalletAddressGenerator {
 
-    public static final String HMAC_SHA512_ALG = "HmacSHA512";
-
     public static final String SOL_PATH = "m/44'/501'/0'/0/";
 
-    public static final String ED_25519_SEED = "ed25519 seed";
+    private static final int HARDENED_INDEX_OFFSET = 0x80000000;
 
-    public static final int HARDENED_INDEX_OFFSET = 0x80000000;
-    public static final String HMAC_SHA_512_GENERATION_FAILED = "hmacSha512 generation failed ";
+    private static final String HMAC_SHA512_ALG = "HmacSHA512";
+
+    private static final String ED_25519_SEED = "ed25519 seed";
+
+    private static final String HMAC_SHA_512_GENERATION_FAILED = "hmacSha512 generation failed ";
 
     public List<Wallet> generateAddresses(String mnemonic) throws WalletGenerationException {
 
@@ -41,7 +42,6 @@ public class SolAddressGenerator extends WalletAddressGenerator {
                     .collect(Collectors.toList());
 
         } catch (Exception e) {
-
             log.error("SOLANA WALLET GENERATION FAILED", e);
             throw new WalletGenerationException(ERROR_GENERATING_WALLETS, e);
 
@@ -121,11 +121,11 @@ public class SolAddressGenerator extends WalletAddressGenerator {
 
     }
 
-    private Ed25519PrivateKeyParameters deriveKeyFromPath(Ed25519PrivateKeyParameters masterKey, List<ChildNumber> pathList) {
+    private Ed25519PrivateKeyParameters deriveKeyFromPath(Ed25519PrivateKeyParameters masterKey, List<ChildNumber> paths) {
 
         Ed25519PrivateKeyParameters currentKey = masterKey;
 
-        for (ChildNumber childNumber : pathList) {
+        for (ChildNumber childNumber : paths) {
             currentKey = deriveChildKey(currentKey, childNumber.getI());
         }
         return currentKey;

@@ -16,7 +16,7 @@ import org.web3j.crypto.Credentials;
 public class EthAddressGenerator extends WalletAddressGenerator {
 
     public static final String ETH_PATH = "m/44'/60'/0'/0/";
-    public static final int RADIX = 16;
+    private static final int RADIX = 16;
 
 
     public List<Wallet> generateAddresses(String mnemonic) throws WalletGenerationException {
@@ -31,12 +31,9 @@ public class EthAddressGenerator extends WalletAddressGenerator {
                     .range(0, NUM_ADDRESSES)
                     .mapToObj(i -> getWallet(i, masterKeypair))
                     .collect(Collectors.toList());
-
         } catch (Exception e) {
-
             log.error("ETHEREUM WALLET GENERATION FAILED", e);
             throw new WalletGenerationException(ERROR_GENERATING_WALLETS, e);
-
         }
     }
 
@@ -56,7 +53,6 @@ public class EthAddressGenerator extends WalletAddressGenerator {
     }
 
     private Wallet buildEth(Bip32ECKeyPair derivedKeypair, Credentials credentials, String path) {
-
         return Wallet
                 .builder()
                 .privateKey(derivedKeypair
@@ -68,7 +64,5 @@ public class EthAddressGenerator extends WalletAddressGenerator {
                 .address(credentials.getAddress())
                 .path(path)
                 .build();
-
     }
-
 }

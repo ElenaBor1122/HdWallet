@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Main {
 
-    public static final String MNEMONIC = "moon call borrow staff hood catch else egg famous surround original below resist observe enact";
+    private static final String MNEMONIC = "moon call borrow staff hood catch else egg famous surround original below resist observe enact";
 
     public static void main(String[] args) {
 

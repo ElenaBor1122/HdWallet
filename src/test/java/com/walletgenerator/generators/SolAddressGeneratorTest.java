@@ -9,8 +9,10 @@ import static com.walletgenerator.generators.impl.SolAddressGenerator.SOL_PATH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.walletgenerator.exception.WalletGenerationException;
 import com.walletgenerator.generators.impl.SolAddressGenerator;
 import com.walletgenerator.model.Wallet;
 import java.util.List;
@@ -26,18 +28,18 @@ public class SolAddressGeneratorTest {
     private SolAddressGenerator solAddressGenerator;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         solAddressGenerator = new SolAddressGenerator();
     }
 
     @Test
-    public void testGenerateCorrectNumberOfAddresses() {
+    void testGenerateCorrectNumberOfAddresses() {
         List<Wallet> wallets = solAddressGenerator.generateAddresses(TEST_MNEMONIC);
         assertEquals(NUM_ADDRESSES, wallets.size(), "Should generate the correct number of addresses");
     }
 
     @Test
-    public void testGenerateUniqueAddresses() {
+    void testGenerateUniqueAddresses() {
         List<Wallet> wallets = solAddressGenerator.generateAddresses(TEST_MNEMONIC);
         Set<String> uniqueAddresses = wallets
                 .stream()
@@ -47,7 +49,7 @@ public class SolAddressGeneratorTest {
     }
 
     @Test
-    public void testGenerateCorrectPaths() {
+    void testGenerateCorrectPaths() {
         List<Wallet> wallets = solAddressGenerator.generateAddresses(TEST_MNEMONIC);
         for (int i = 0; i < NUM_ADDRESSES; i++) {
             String expectedPath = SOL_PATH + i + (i < DERIVATION_NUMBER ? QUOTE : EMPTY_STRING);
@@ -58,7 +60,7 @@ public class SolAddressGeneratorTest {
     }
 
     @Test
-    public void testGenerateNonEmptyKeys() {
+    void testGenerateNonEmptyKeys() {
         List<Wallet> wallets = solAddressGenerator.generateAddresses(TEST_MNEMONIC);
         wallets.forEach(wallet -> {
             assertNotNull(wallet.getPrivateKey(), "Private key should not be null");
@@ -78,7 +80,7 @@ public class SolAddressGeneratorTest {
     }
 
     @Test
-    public void testFirstAndLastPaths() {
+    void testFirstAndLastPaths() {
         List<Wallet> wallets = solAddressGenerator.generateAddresses(TEST_MNEMONIC);
 
         String firstPath = wallets
@@ -91,4 +93,20 @@ public class SolAddressGeneratorTest {
                 .getPath();
         assertTrue(lastPath.endsWith("9"), "The last path should end with '9'");
     }
+
+    @Test
+    void testGenerateAddressesWithEmptyMnemonicThrowsWalletGenerationException() {
+
+        String emptyMnemonic = "";
+
+        assertThrows(WalletGenerationException.class, () -> solAddressGenerator.generateAddresses(emptyMnemonic),
+                     "Expected WalletGenerationException to be thrown due to an empty mnemonic");
+    }
+
+    @Test
+    void testGenerateAddressesWithNullMnemonicThrowsWalletGenerationException() {
+        assertThrows(WalletGenerationException.class, () -> solAddressGenerator.generateAddresses(null),
+                     "Expected WalletGenerationException to be thrown due to an empty mnemonic");
+    }
+
 }

@@ -10,20 +10,18 @@ import org.web3j.crypto.MnemonicUtils;
 
 public abstract class WalletAddressGenerator {
 
-    public static final String PATH_SEPARATOR = "/";
-
-    public static final String MASTER_NODE_IDENTIFIER = "m";
-
+    private static final String PATH_SEPARATOR = "/";
+    private static final String MASTER_NODE_IDENTIFIER = "m";
+    protected static final String ERROR_GENERATING_WALLETS = "Error generating wallets: ";
     public static final int NUM_ADDRESSES = 10;
     public static final int DERIVATION_NUMBER = 3;
-    public static final String ERROR_GENERATING_WALLETS = "Error generating wallets: ";
 
     public static final String QUOTE = "'";
     public static final String EMPTY_STRING = "";
 
     public abstract List<Wallet> generateAddresses(String mnemonic) throws WalletGenerationException;
 
-    public List<ChildNumber> parsePathWithHardAndSoft(String path) {
+    protected List<ChildNumber> parsePathWithHardAndSoft(String path) {
 
         return Arrays
                 .stream(path.split(PATH_SEPARATOR))
@@ -38,7 +36,7 @@ public abstract class WalletAddressGenerator {
         return new ChildNumber(index, hard);
     }
 
-    public byte[] generateSeedFromMnemonic(String mnemonic) {
+    protected byte[] generateSeedFromMnemonic(String mnemonic) {
         return MnemonicUtils.generateSeed(mnemonic, null);
     }
 }
